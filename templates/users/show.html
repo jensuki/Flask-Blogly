@@ -1,0 +1,22 @@
+<!-- Show clicked user's details -->
+
+{% extends "base.html" %}
+
+{% block title %}{{ user.full_name }}{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-start">
+    <img src="{{ user.image_url }}" width="200" class="me-3">
+    <div class="mt-5">
+        <h1>{{ user.full_name }}</h1>
+        <div>
+            <a href="/users/{{ user.id }}/edit" class="btn btn-secondary">Edit</a>
+            <form action="/users/{{ user.id }}/delete" method="POST" class="d-inline-block ms-2">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
