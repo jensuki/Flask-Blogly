@@ -1,6 +1,6 @@
 import unittest
 from app import app, db
-from models import User
+from models import User, Post
 
 class BloglyTestCase(unittest.TestCase):
     def setUp(self):
@@ -92,4 +92,64 @@ class BloglyTestCase(unittest.TestCase):
             self.assertIsNotNone(user)
             self.assertEqual(user.image_url, "https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png")
 
+    ##################
 
+    def test_post_creation(self):
+        """Test that a user can create a post"""
+        with app.app_context():
+            user = User(first_name="Test", last_name="User", image_url="https://example.com/test.png")
+            db.session.add(user)
+            db.session.commit()
+
+            response = self.client.post(f'/users/{user.id}/posts/new', data={
+                'title': 'Test Post',
+                'content': 'This is a test post.'
+            })
+
+            self.assertEqual(response.status_code, 302)
+            post = Post.query.filter_by(title='Test Post').first()
+            self.assertIsNotNone(post)
+            self.assertEqual(post.content, 'This is a test post.')
+
+            # fetch the updated user page to check if the post appears
+            response = self.client.get(f'/users/{user.id}')
+            self.assertIn(b'Test Post', response.data)
+
+    def test_post_edit(self):
+        """Test editing a users post details"""
+        with app.app_context():
+            user = User(first_name="Test", last_name="User", image_url="https://example.com/test.png")
+            db.session.add(user)
+            db.session.commit()
+
+            post = Post(title="Old Title", content="Old content.", user_id=user.id)
+            db.session.add(post)
+            db.session.commit()
+
+            response = self.client.post(f'/posts/{post.id}/edit', data={
+                'title': 'New Title',
+                'content': 'New content.'
+            })
+
+            self.assertEqual(response.status_code, 302)
+
+            updated_post = Post.query.get(post.id)
+            self.assertEqual(updated_post.title, 'New Title')
+            self.assertEqual(updated_post.content, 'New content.')
+
+    def test_post_deletion(self):
+        """Test deleting a users post"""
+        with app.app_context():
+            user = User(first_name='Test', last_name='User', image_url='https://example.com/test.png')
+            db.session.add(user)
+            db.session.commit()
+
+            post = Post(title='Title to Delete', content='Content to delete.', user_id=user.id)
+            db.session.add(post)
+            db.session.commit()
+
+            response = self.client.post(f'/posts/{post.id}/delete')
+            self.assertEqual(response.status_code, 302)
+
+            deleted_post = Post.query.get(post.id)
+            self.assertIsNone(deleted_post)

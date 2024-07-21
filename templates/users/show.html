@@ -18,5 +18,19 @@
         </div>
     </div>
 </div>
-
+<!--Posts list-->
+<h2>Posts</h2>
+<ul>
+    {% for post in user.posts %}
+    <li>
+        <a href="/posts/{{ post.id }}">{{ post.title }}</a>
+    </li>
+    {% else %}
+    <li>
+        <italic>No Posts Yet</italic>
+    </li>
+    {% endfor %}
+</ul>
+<a href="/users/{{ user.id }}/posts/new" class="btn btn-primary">Add Post</a>
+<a href="/users" class="btn btn-secondary">Back to All Users</a>
 {% endblock %}
