@@ -1,6 +1,6 @@
 import unittest
 from app import app, db
-from models import User, Post
+from models import User, Post, Tag
 
 class BloglyTestCase(unittest.TestCase):
     def setUp(self):
@@ -153,3 +153,58 @@ class BloglyTestCase(unittest.TestCase):
 
             deleted_post = Post.query.get(post.id)
             self.assertIsNone(deleted_post)
+
+    def test_tag_creation(self):
+        """Test creating a Tag."""
+        with app.app_context():
+            response = self.client.post('/tags/new', data={"name": "Test Tag"}, follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Test Tag', response.data)
+
+    def test_tag_list(self):
+        """Test listing all Tags."""
+        with app.app_context():
+            tag = Tag(name="Test Tag")
+            db.session.add(tag)
+            db.session.commit()
+
+            response = self.client.get('/tags')
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Test Tag', response.data)
+
+    def test_tag_detail(self):
+        """Test viewing a single Tag."""
+        with app.app_context():
+            tag = Tag(name="Test Tag")
+            db.session.add(tag)
+            db.session.commit()
+
+            response = self.client.get(f'/tags/{tag.id}')
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Test Tag', response.data)
+
+    def test_tag_edit(self):
+        """Test editing a Tag."""
+        with app.app_context():
+            tag = Tag(name="Test Tag")
+            db.session.add(tag)
+            db.session.commit()
+
+            edit_data = {
+                "name": "Updated Tag"
+            }
+
+            response = self.client.post(f'/tags/{tag.id}/edit', data=edit_data, follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Updated Tag', response.data)
+
+    def test_tag_delete(self):
+        """Test deleting a Tag."""
+        with app.app_context():
+            tag = Tag(name="Test Tag")
+            db.session.add(tag)
+            db.session.commit()
+
+            response = self.client.post(f'/tags/{tag.id}/delete', follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertNotIn(b'Test Tag', response.data)

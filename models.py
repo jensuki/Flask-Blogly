@@ -81,8 +81,7 @@ class PostTag(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id', primary_key=True))
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'), primary_key=True)
 
-    # Composite primary key to ensure no duplicate post_id and tag_id combinations
-    __table_args__ = (db.PrimaryKeyConstraint('post_id', 'tag_id'),)
+
 
     def __repr__(self):
         return f"<PostTag {self.post_id} {self.tag_id}>"
