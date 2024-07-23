@@ -6,6 +6,13 @@
 
 <h1>{{ post.title }}</h1>
 <p>{{ post.content }}</p>
+{% if post.tags %}
+<p><b>Tags:</b>
+    {% for tag in post.tags %}
+    <a href="/tags/{{ tag.id }}"><i class="badge badge-primary">{{ tag.name }}</i></a>
+    {% endfor %}
+</p>
+{% endif %}
 <p>Posted on: {{ post.formatted_date }}</p>
 
 <div class="d-flex mb-4">

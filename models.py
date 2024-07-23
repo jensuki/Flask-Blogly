@@ -50,11 +50,42 @@ class Post(db.Model):
                         db.ForeignKey('users.id'),
                         nullable=False)
 
-# format date
+    # relationship to Tag <--> PostTags
+    tags = db.relationship('Tag', secondary="post_tags", backref="posts")
 
+    def __repr__(self):
+        return f"<Post {self.title} {self.content} {self.created_at}>"
+
+# format date
     @property
     def formatted_date(self):
         return self.created_at.strftime("%B %d, %Y at %I:%M %p")
+
+class Tag(db.Model):
+    """Tag model"""
+
+    __tablename__ = 'tags'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+
+    def __repr__(self):
+        return f"<Tag {self.name}>"
+
+
+class PostTag(db.Model):
+    """PostTag model (JOINER) table"""
+
+    __tablename__ = 'post_tags'
+
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id', primary_key=True))
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'), primary_key=True)
+
+    # Composite primary key to ensure no duplicate post_id and tag_id combinations
+    __table_args__ = (db.PrimaryKeyConstraint('post_id', 'tag_id'),)
+
+    def __repr__(self):
+        return f"<PostTag {self.post_id} {self.tag_id}>"
 
 
 # connect db to flask app
